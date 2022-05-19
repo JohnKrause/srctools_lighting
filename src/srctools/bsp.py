@@ -655,6 +655,11 @@ class RevEdge(Edge):
     def b(self, value: Vec) -> None:
         self.opposite.a = value
 
+@attr.define(eq=False)
+class RGBExp32:
+    """RGB description of lightmap samples"""
+    rgb=Tuple[int, int, int]
+    exp=int
 
 @attr.define(eq=False)
 class Face:
@@ -666,7 +671,7 @@ class Face:
     texinfo: Optional[TexInfo]
     _dispinfo_ind: int  # TODO
     surf_fog_volume_id: int
-    light_styles: bytes
+    light_styles: List[RGBExp32]
     _lightmap_off: int  # TODO
     area: float
     lightmap_mins: Tuple[int, int]
@@ -1137,6 +1142,7 @@ class BSP:
     orig_faces: ParsedLump[List['Face']] = ParsedLump(BSP_LUMPS.ORIGINALFACES)
     hdr_faces: ParsedLump[List['Face']] = ParsedLump(BSP_LUMPS.FACES_HDR)
     primitives: ParsedLump[List['Primitive']] = ParsedLump(BSP_LUMPS.PRIMITIVES, BSP_LUMPS.PRIMINDICES, BSP_LUMPS.PRIMVERTS)
+    #lights: ParsedLump[List['Face']] = ParsedLump(BSP_LUMPS.FACES_HDR)
 
     # Game lumps
     props: ParsedLump[List['StaticProp']] = ParsedLump(LMP_ID_STATIC_PROPS)
