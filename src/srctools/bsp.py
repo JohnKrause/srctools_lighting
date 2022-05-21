@@ -655,18 +655,18 @@ class RevEdge(Edge):
     def b(self, value: Vec) -> None:
         self.opposite.a = value
 
-    
-#WORKING
+#WIP
 @attr.define(eq=False)
 class LightMap:
-    bumpmapped: bool
-    lightmap_ldr: List['RGBE']
-    lightmap_bump_ldr: List[List['RGBE']]
-    avglight_ldr: RGBE
-    lightmap_hdr: List['RGBE']
-    lightmap_bump_hdr: List[List['RGBE']]
-    avglight_hdr: RGBE
+    luxels: List['RGBE']
     
+
+@attr.define(eq=False)
+class LightStyle:
+    size_x: int
+    size_y: int
+     
+
 
 @attr.define(eq=False)
 class Face:
@@ -1685,14 +1685,18 @@ class BSP:
                 hammer_id = None
             #If light offset is not negative, there is a lightmap
             #If light style is 255, use empty lightmap
+            #If texinfo has a bumpmap, extract 3 additional lightmaps
             if light_offset >= 0:
-                lightmaps: List[LightMap]
+                lightstyle_offset=light_offset
                 lightmapsize = (lightmap_size_x+1) * (lightmap_size_y+1)
+                
+                lightmaps: List[Optional[LightMap]]
                 for style_id, style in enumerate(lightstyles):
                     if style==255:
-                        lightmaps.append(LightMap(None,None))
+                        lightmaps.append(None)
                         continue
-##WORKING
+
+#WIP
                 lightmaps.append(LightMap[])
 
 
