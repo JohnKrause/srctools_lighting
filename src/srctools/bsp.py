@@ -19,7 +19,7 @@ import attr
 import os
 
 from srctools import AtomicWriter, conv_int
-from srctools.math import Vec, Angle
+from srctools.math import Vec, Angle, RGBE
 from srctools.filesys import FileSystem
 from srctools.vtf import VTF
 from srctools.vmt import Material
@@ -655,11 +655,18 @@ class RevEdge(Edge):
     def b(self, value: Vec) -> None:
         self.opposite.a = value
 
+    
+#WORKING
 @attr.define(eq=False)
-class RGBExp32:
-    """RGB description of lightmap samples"""
-    rgb=Tuple[int, int, int]
-    exp=int
+class LightMap:
+    bumpmapped: bool
+    lightmap_ldr: List['RGBE']
+    lightmap_bump_ldr: List[List['RGBE']]
+    avglight_ldr: RGBE
+    lightmap_hdr: List['RGBE']
+    lightmap_bump_hdr: List[List['RGBE']]
+    avglight_hdr: RGBE
+    
 
 @attr.define(eq=False)
 class Face:
@@ -671,7 +678,7 @@ class Face:
     texinfo: Optional[TexInfo]
     _dispinfo_ind: int  # TODO
     surf_fog_volume_id: int
-    light_styles: List[RGBExp32]
+    light_styles: List[LightMap]
     _lightmap_off: int  # TODO
     area: float
     lightmap_mins: Tuple[int, int]
@@ -1142,7 +1149,9 @@ class BSP:
     orig_faces: ParsedLump[List['Face']] = ParsedLump(BSP_LUMPS.ORIGINALFACES)
     hdr_faces: ParsedLump[List['Face']] = ParsedLump(BSP_LUMPS.FACES_HDR)
     primitives: ParsedLump[List['Primitive']] = ParsedLump(BSP_LUMPS.PRIMITIVES, BSP_LUMPS.PRIMINDICES, BSP_LUMPS.PRIMVERTS)
-    #lights: ParsedLump[List['Face']] = ParsedLump(BSP_LUMPS.FACES_HDR)
+
+    lights: ParsedLump[List['RGBE']] = ParsedLump(BSP_LUMPS.LIGHTS)
+    lights_hdr: ParsedLump[List['RGBE']] = ParsedLump(BSP_LUMPS.LIGHTS_HDR)
 
     # Game lumps
     props: ParsedLump[List['StaticProp']] = ParsedLump(LMP_ID_STATIC_PROPS)
@@ -1674,6 +1683,19 @@ class BSP:
             else:
                 orig_face = texinfo = None
                 hammer_id = None
+            #If light offset is not negative, there is a lightmap
+            #If light style is 255, use empty lightmap
+            if light_offset >= 0:
+                lightmaps: List[LightMap]
+                lightmapsize = (lightmap_size_x+1) * (lightmap_size_y+1)
+                for style_id, style in enumerate(lightstyles):
+                    if style==255:
+                        lightmaps.append(LightMap(None,None))
+                        continue
+##WORKING
+                lightmaps.append(LightMap[])
+
+
             yield Face(
                 self.planes[plane_num],
                 side, on_node,

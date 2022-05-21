@@ -1845,6 +1845,28 @@ class Angle:
         self._yaw = new_ang._yaw
         self._roll = new_ang._roll
 
+@final
+class RGBE:
+    """Implements RGBE format"""
+    rgb: Tuple[int,int,int]
+    e: int
+    def __init__(self, 
+                 rgb: Tuple[int,int,int], 
+                 e: int) -> None:
+        self.rgb=rgb
+        self.e=e
+        
+    @property
+    def rgbe(self) -> List[float]:
+        return [color*(2**self.e) for color in self.rgb]
+
+    @rgbe.setter
+    def rgbe(self, rgb: List[float]) -> None:
+        exp = round(math.log(max(self.rgb)/255,2),0)
+        if exp>127: exp=127
+        if exp<-128: exp=-128
+        self.rgb=tuple([int(round(c/(2**exp),0)) for c in rgb])
+        self.e = int(exp)
 
 def quickhull(vertexes: Iterable[Vec]) -> List[Tuple[Vec, Vec, Vec]]:
     """Use the quickhull algorithm to construct a convex hull around the provided points."""
